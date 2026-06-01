@@ -18,11 +18,22 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install backend dependencies
         working-directory: ./backend
         run: |
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          # Install CPU-only torch wheel (196 MB vs 870 MB CUDA) — tests mock all ML calls
+          pip install torch==2.3.0+cpu --index-url https://download.pytorch.org/whl/cpu --quiet
+          # Install remaining requirements (torch already satisfied above)
+          pip install -r requirements.txt --quiet
+          pip install -r requirements-dev.txt --quiet
 
       - name: Run tests with coverage
         working-directory: ./backend

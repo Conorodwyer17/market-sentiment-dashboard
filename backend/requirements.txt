@@ -10,7 +10,7 @@ torch==2.3.0
 newsdataapi==0.2.0
 pandas-datareader==0.10.0
 pandas==2.2.2
-yfinance>=0.2.38
+yfinance>=0.2.38,<2.0.0
 numpy==1.26.4
 apscheduler==3.10.4
 cachetools==5.3.3
