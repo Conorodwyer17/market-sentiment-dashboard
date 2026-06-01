@@ -8,13 +8,7 @@ class Base(DeclarativeBase):
     pass
 
 
-engine = create_async_engine(
-    settings.database_url,
-    echo=False,
-    # SQLite: enable WAL mode and a 30-second busy timeout so concurrent
-    # scheduler jobs don't raise "database is locked".
-    connect_args={"timeout": 30, "check_same_thread": False},
-)
+engine = create_async_engine(settings.database_url, echo=False)
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
