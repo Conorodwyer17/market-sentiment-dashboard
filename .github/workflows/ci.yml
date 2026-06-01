@@ -22,18 +22,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements-ci.txt', 'backend/requirements-dev.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
       - name: Install backend dependencies
         working-directory: ./backend
         run: |
-          # Install CPU-only torch wheel (196 MB vs 870 MB CUDA) — tests mock all ML calls
-          pip install torch==2.3.0+cpu --index-url https://download.pytorch.org/whl/cpu --quiet
-          # Install remaining requirements (torch already satisfied above)
-          pip install -r requirements.txt --quiet
-          pip install -r requirements-dev.txt --quiet
+          # requirements-ci.txt omits torch/transformers (both mocked in all tests)
+          # This cuts install time from ~30 min to ~30 seconds
+          pip install -r requirements-dev.txt
 
       - name: Run tests with coverage
         working-directory: ./backend

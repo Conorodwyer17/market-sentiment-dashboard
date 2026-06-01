@@ -1,0 +1,22 @@
+# CI requirements — excludes torch and transformers (both are mocked in tests).
+# torch (~870 MB) and transformers are never actually imported during test execution;
+# all FinBERT calls go through app.ml.finbert which is fully mocked.
+# Production Dockerfile uses requirements.txt which includes both.
+fastapi==0.111.1
+uvicorn[standard]==0.29.0
+pydantic==2.7.1
+pydantic-settings==2.3.1
+sqlalchemy==2.0.30
+aiosqlite==0.20.0
+alembic==1.13.1
+newsdataapi==0.2.0
+pandas-datareader==0.10.0
+pandas==2.2.2
+yfinance>=0.2.38,<2.0.0
+numpy==1.26.4
+apscheduler==3.10.4
+cachetools==5.3.3
+httpx==0.27.0
+python-multipart==0.0.9
+structlog==24.2.0
+requests==2.32.2
