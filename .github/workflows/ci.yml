@@ -29,18 +29,50 @@ jobs:
       - name: Install backend dependencies
         working-directory: ./backend
         run: |
-          # requirements-ci.txt omits torch/transformers (both mocked in all tests)
           pip install -r requirements-dev.txt
 
-      - name: Verify imports
+      - name: Diagnose imports
         working-directory: ./backend
         env:
           NEWSDATA_API_KEY: "test_key_not_real"
           ALPHA_VANTAGE_API_KEY: "test_key_not_real"
           DATABASE_URL: "sqlite+aiosqlite:///./test.db"
         run: |
-          python -c "from app.main import app; print('app import OK')"
-          python -m pytest tests/ --collect-only -q 2>&1 | head -20
+          python - <<'PYEOF'
+          import sys
+          steps = [
+              ("fastapi", "import fastapi"),
+              ("sqlalchemy", "import sqlalchemy"),
+              ("pydantic_settings", "import pydantic_settings"),
+              ("structlog", "import structlog"),
+              ("apscheduler", "from apscheduler.schedulers.asyncio import AsyncIOScheduler"),
+              ("pandas", "import pandas"),
+              ("httpx", "import httpx"),
+              ("yfinance", "import yfinance"),
+              ("app.core.config", "from app.core.config import settings; print('db_url:', settings.database_url[:30])"),
+              ("app.core.database", "from app.core.database import engine"),
+              ("app.core.logging", "from app.core.logging import configure_logging; configure_logging()"),
+              ("app.ml.finbert", "from app.ml import finbert"),
+              ("app.models.orm", "from app.models.orm import Asset"),
+              ("app.routers", "from app.routers import assets, health, news, prices, sentiment, signals"),
+              ("app.services.price_service", "from app.services.price_service import PriceService"),
+              ("app.services.news_service", "from app.services.news_service import NewsService"),
+              ("app.services.scheduler", "from app.services.scheduler import create_scheduler"),
+              ("app.services.sentiment_service", "from app.services.sentiment_service import SentimentService"),
+              ("app.services.signal_service", "from app.services.signal_service import SignalService"),
+              ("app.main", "from app.main import app"),
+          ]
+          failed = False
+          for name, code in steps:
+              try:
+                  exec(code)
+                  print(f"  OK  {name}")
+              except Exception as e:
+                  print(f"  FAIL {name}: {type(e).__name__}: {e}", file=sys.stderr)
+                  failed = True
+                  break
+          sys.exit(1 if failed else 0)
+          PYEOF
 
       - name: Run tests with coverage
         working-directory: ./backend
