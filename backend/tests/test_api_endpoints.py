@@ -2,13 +2,14 @@
 API endpoint tests — all external calls mocked; no real network, no real model.
 """
 import asyncio
+import tempfile
+import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.pool import StaticPool
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.database import Base, get_db
@@ -21,16 +22,17 @@ from app.models.orm import Asset, NewsArticle, PriceBar, SignalSnapshot
 @pytest.fixture(scope="module")
 def test_client():
     """
-    TestClient backed by an in-memory SQLite DB.
+    TestClient backed by a temp-file SQLite DB.
+    Using a file ensures all sessions share the same state (avoids in-memory
+    connection isolation issues with StaticPool + aiosqlite).
     FinBERT loading and all scheduler jobs are skipped.
     """
-    # StaticPool ensures all sessions share the same in-memory connection
-    # so seeded data is visible to the request-scoped override_db sessions.
-    engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
+    # Temp file persists for the module; deleted in the finally block.
+    tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+    tmp.close()
+    db_url = f"sqlite+aiosqlite:///{tmp.name}"
+
+    engine = create_async_engine(db_url)
     loop = asyncio.new_event_loop()
 
     async def _setup():
@@ -84,6 +86,10 @@ def test_client():
 
     loop.run_until_complete(engine.dispose())
     loop.close()
+    try:
+        os.unlink(tmp.name)
+    except OSError:
+        pass
 
 
 # ── /health ───────────────────────────────────────────────────────────────────
