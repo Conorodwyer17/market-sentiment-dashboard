@@ -1,0 +1,42 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    environment:
+      - NEWSDATA_API_KEY=${NEWSDATA_API_KEY}
+      - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY}
+      - DATABASE_URL=sqlite+aiosqlite:////app/data/market_sentiment.db
+      - TRANSFORMERS_CACHE=/app/models
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DEFAULT_EQUITY_TICKERS=${DEFAULT_EQUITY_TICKERS:-AAPL,MSFT,GOOGL,NVDA,TSLA}
+      - DEFAULT_CRYPTO_TICKERS=${DEFAULT_CRYPTO_TICKERS:-BTC-USD,ETH-USD}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8050:8050"
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  data:
+  models:

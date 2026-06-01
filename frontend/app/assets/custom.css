@@ -1,0 +1,100 @@
+/* ──────────────────────────────────────────────────────────────
+   Market Sentiment Dashboard — Dash component overrides
+   Fixes dropdown readability on the DARKLY Bootstrap theme
+──────────────────────────────────────────────────────────────── */
+
+/* ── Dropdown control box ────────────────────────────────────── */
+.Select-control {
+    background-color: #0f3460 !important;
+    border-color: #2d6a9f !important;
+    color: #dfe6e9 !important;
+}
+
+.Select-control:hover {
+    border-color: #74b9ff !important;
+    box-shadow: 0 0 0 1px #74b9ff !important;
+}
+
+/* Selected value text */
+.Select-value-label,
+.Select-value {
+    color: #dfe6e9 !important;
+}
+
+/* Placeholder text */
+.Select-placeholder {
+    color: #b2bec3 !important;
+}
+
+/* Dropdown arrow */
+.Select-arrow-zone .Select-arrow {
+    border-top-color: #b2bec3 !important;
+}
+
+.is-open > .Select-control .Select-arrow {
+    border-bottom-color: #b2bec3 !important;
+}
+
+/* ── Dropdown menu popup (options list) ──────────────────────── */
+/* Light background so dark text is clearly readable             */
+.Select-menu-outer {
+    background-color: #f0f4f8 !important;
+    border: 1px solid #0f3460 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6) !important;
+    z-index: 9999 !important;
+}
+
+.Select-menu {
+    background-color: #f0f4f8 !important;
+}
+
+/* Each option — dark text on light background */
+.Select-option {
+    background-color: #f0f4f8 !important;
+    color: #1a1a2e !important;
+    font-weight: 500;
+    padding: 8px 12px;
+}
+
+/* Hovered/keyboard-focused option */
+.Select-option.is-focused {
+    background-color: #0f3460 !important;
+    color: #ffffff !important;
+}
+
+/* Currently selected option */
+.Select-option.is-selected {
+    background-color: #16213e !important;
+    color: #74b9ff !important;
+    font-weight: 600;
+}
+
+.Select-option.is-selected.is-focused {
+    background-color: #0f3460 !important;
+    color: #ffffff !important;
+}
+
+/* Search input inside dropdown */
+.Select-input input {
+    color: #dfe6e9 !important;
+    caret-color: #dfe6e9;
+}
+
+/* ── Multi-value tags (multi-select mode, if used) ───────────── */
+.Select-multi-value-wrapper .Select-value {
+    background-color: #0f3460 !important;
+    border-color: #2d6a9f !important;
+    color: #dfe6e9 !important;
+}
+
+/* ── Scrollbar inside menu ───────────────────────────────────── */
+.Select-menu::-webkit-scrollbar {
+    width: 6px;
+}
+.Select-menu::-webkit-scrollbar-thumb {
+    background: #0f3460;
+    border-radius: 3px;
+}
+.Select-menu::-webkit-scrollbar-track {
+    background: #f0f4f8;
+}
